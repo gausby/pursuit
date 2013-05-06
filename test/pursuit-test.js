@@ -86,6 +86,23 @@ buster.testCase('Pursuit', {
         assert.isTrue(query({'foo': 'back in the bay area'}));
         assert.isTrue(query2({'foo': 'zebras can handle quite some attention from other zebras.'}));
         refute.isTrue(query({'foo': 'apples are healthy'}));
+    },
+
+    'should be able to test if a string ends a specified substring': function () {
+        var query = pursuit({
+            foo: { endsWith: 'ab' }
+        });
+
+        var query2 = pursuit({
+            foo: { endsWith: 'zebra' }
+        });
+
+        assert.isTrue(query({'foo': 'bab'}));
+        assert.isTrue(query({'foo': 'ab'}));
+        assert.isTrue(query({'foo': 'foo zab'}));
+        refute.isTrue(query({'foo': 'foo'}));
+
+        assert.isTrue(query2({'foo': 'I wish I had a zebra'}));
     }
 
 });
