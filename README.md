@@ -3,6 +3,33 @@
 Pursuit is a Object Query Language written for JavaScript. It compiles a given query into JavaScript code for optimal performance when checking many objects for certain characteristics. All compiled functions returns a boolean value, making them useful in filter functions.
 
 
+## Usage
+
+To create a function that test for a key called `foo` with the value of `bar`.
+
+    var pursuit = require('pursuit');
+
+    var test = pursuit({
+        'foo': { equals: 'bar' }
+    });
+
+`test` will now hold a function that takes an object as an argument. It will return true if the input object has a key called `foo` that has the value of `bar`, and false otherwise.
+
+    test({ 'foo': 'bar' }); // true
+    test({ 'foo': 'baz' }); // false
+    test({ 'baz': 'foo' }); // false
+
+This can easily be used in filter functions, as such:
+
+    var objList = [
+        { 'foo': 'bar', value: 1 },
+        { 'foo': 'baz', value: 2 },
+        { 'foo': 'bar', value: 3 }
+    ];
+
+    objList.filter(test); // [{ 'foo': 'bar', value: 1 }, { 'foo': 'bar', value: 3 }]
+
+
 ## Development
 After cloning the project you will have to run `npm install` in the project root. This will install the various grunt plugins and other dependencies.
 
