@@ -61,6 +61,19 @@ buster.testCase('Pursuit', {
         refute.isTrue(query({'foo': 10}));
     },
 
+    'should be able to test for values less than or equal to': function () {
+        var query = pursuit({
+            foo: { lessThanOrEqualTo: 5 }
+        });
+
+        assert.isTrue(query({'foo': 0}));
+        assert.isTrue(query({'foo': 1}));
+        assert.isTrue(query({'foo': 4.99}));
+        assert.isTrue(query({'foo': 5}));
+        refute.isTrue(query({'foo': 5.000001}));
+        refute.isTrue(query({'foo': 10}));
+    },
+
     'should be able to test if a string contains a specified substring': function () {
         var query = pursuit({
             foo: { contains: 'b' }
