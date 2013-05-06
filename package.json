@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "description": "A JavaScript Object Query Language",
     "author": "Martin Gausby <martin@gausby.dk>",
-    "repository": "git+ssh://git@gitolite:PROJECT.git",
+    "repository": "git@github.com:gausby/pursuit.git",
     "main": "lib/pursuit.js",
     "dependencies": {
     },
