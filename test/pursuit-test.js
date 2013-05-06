@@ -70,6 +70,22 @@ buster.testCase('Pursuit', {
         assert.isTrue(query({'foo': 'cab'}));
         assert.isTrue(query({'foo': 'bac'}));
         refute.isTrue(query({'foo': 'acd'}));
+    },
+
+    'should be able to test if a string starts with a given string': function () {
+        var query = pursuit({
+            foo: { beginsWith: 'b' }
+        });
+
+        var query2 = pursuit({
+            foo: { beginsWith: 'zebra' }
+        });
+
+        assert.isTrue(query({'foo': 'banana'}));
+        assert.isTrue(query({'foo': 'balloons are fun'}));
+        assert.isTrue(query({'foo': 'back in the bay area'}));
+        assert.isTrue(query2({'foo': 'zebras can handle quite some attention from other zebras.'}));
+        refute.isTrue(query({'foo': 'apples are healthy'}));
     }
 
 });
