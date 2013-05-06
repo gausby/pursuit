@@ -61,6 +61,17 @@ buster.testCase('Pursuit', {
         refute.isTrue(query({'foo': 10}));
     },
 
+    'should be able to test if a string contains a specified substring': function () {
+        var query = pursuit({
+            foo: { contains: 'b' }
+        });
+
+        assert.isTrue(query({'foo': 'abc'}));
+        assert.isTrue(query({'foo': 'cab'}));
+        assert.isTrue(query({'foo': 'bac'}));
+        refute.isTrue(query({'foo': 'acd'}));
+    }
+
 });
 
 buster.testCase('Claims made in the README.md', {
