@@ -50,6 +50,17 @@ buster.testCase('Pursuit', {
         refute.isTrue(query({'foo': 4}));
     },
 
+    'should be able to test for values greater than or equal to': function () {
+        var query = pursuit({
+            foo: { greaterThanOrEqualTo: 5 }
+        });
+
+        assert.isTrue(query({'foo': 5.01}));
+        assert.isTrue(query({'foo': 5}));
+        refute.isTrue(query({'foo': 4}));
+        refute.isTrue(query({'foo': 0}));
+    },
+
     'should be able to test for values less than': function () {
         var query = pursuit({
             foo: { lessThan: 5 }
