@@ -37,7 +37,19 @@ buster.testCase('Pursuit', {
 
         assert.isTrue(query({'foo': 'bar'}));
         refute.isTrue(query({'foo': 'baz'}));
-    }
+    },
+
+    'should be able to test for values greater than': function () {
+        var query = pursuit({
+            foo: { greater: 5 }
+        });
+
+        assert.isTrue(query({'foo': 10}));
+        assert.isTrue(query({'foo': 5.01}));
+        refute.isTrue(query({'foo': 5}));
+        refute.isTrue(query({'foo': 4}));
+    },
+
 });
 
 buster.testCase('Claims made in the README.md', {
