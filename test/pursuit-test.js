@@ -127,6 +127,43 @@ buster.testCase('Pursuit', {
         refute.isTrue(query({'foo': 'foo'}));
 
         assert.isTrue(query2({'foo': 'I wish I had a zebra'}));
+    },
+
+    'should be able check on values nested two levels deep': function () {
+        var query = pursuit({
+            config: {
+                type: {
+                    equals: 'test'
+                }
+            }
+        });
+        // in this case object.config.type should be `test`
+        assert.isTrue(query({
+            foo: 'bar',
+            config: {
+                type: 'test'
+            }
+        }));
+    },
+    'should be able check on values nested three (or more) levels deep': function () {
+        var query = pursuit({
+            foo: {
+                bar: {
+                    baz: {
+                        equals: ':)'
+                    }
+                }
+            }
+        });
+
+        // foo.bar.baz should be `:)`
+        assert.isTrue(query({
+            foo: {
+                bar: {
+                    baz: ':)'
+                }
+            }
+        }));
     }
 
 });

@@ -79,11 +79,13 @@ The code for the `equals` property could be (and is) written as:
 
     var dictionary = {
         // ...
-        equals: function (key, value) {
-            return 'entry['+key+'] === ' + value;
+        equals: function (key, value, scope) {
+            return scope + '['+key+'] === ' + value;
         }
         // ...
     }
+
+The `scope` variable correspond to the current scope, should the input object has nested objects; in that case a check for the existence of the variable will be automatically generated for you.
 
 To understand what `key` and `value` correspond to, read the following usage example.
 
