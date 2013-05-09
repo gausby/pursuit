@@ -34,6 +34,161 @@ This can easily be used in filter functions, as such:
     objList.filter(test); // [{ 'foo': 'bar', value: 1 }, { 'foo': 'bar', value: 3 }]
 
 
+### Matchers
+The following will describe the build in matchers. A property can have more than one check inside of it.
+
+
+#### `equals`
+Will check for equality.
+
+    var test = pursuit({
+        foo: {
+            equals: 5
+        }
+    });
+
+    [{foo: 0}, {foo: 5}, {foo: 10}].filter(test); // [{foo: 5}]
+
+
+Comparison can be done with any type that can be compared using the `===` operator.
+
+    var test = pursuit({
+        foo: {
+            equals: 'bar'
+        }
+    });
+
+    [{foo: 'foo'}, {foo: 'bar'}, {foo: 'baz'}].filter(test); // [{foo: 'bar'}]
+
+
+#### `greaterThan`
+Will check if a number (or any other type that can be compared with the `>` operator) is greater than the compiled value.
+
+    var test = pursuit({
+        foo: { greaterThan: 5 }
+    });
+
+    [{foo: 0}, {foo: 5}, {foo: 10}].filter(test); // [{foo: 10}]
+
+
+#### `greaterThanOrEqualTo`
+Will check if a number (or any other type that can be compared with the `>=` operator) is greater than, or equal to, the compiled value.
+
+    var test = pursuit({
+        foo: { greaterThanOrEqualTo: 5 }
+    });
+
+    [{foo: 0}, {foo: 5}, {foo: 10}].filter(test); // [{foo: 5}, {foo: 10}]
+
+
+#### `lessThan`
+Will check if a number (or any other type that can be compared with the `<` operator) is less than the compiled value.
+
+    var test = pursuit({
+        foo: { lessThan: 5 }
+    });
+
+    [{foo: 0}, {foo: 5}, {foo: 10}].filter(test); // [{foo: 0}]
+
+
+#### `lessThanOrEqualTo`
+Will check if a number (or any other type that can be compared with the `<=` operator) is less than, or equal to, the compiled value.
+
+    var test = pursuit({
+        foo: { lessThanOrEqualTo: 5 }
+    });
+
+    [{foo: 0}, {foo: 5}, {foo: 10}].filter(test); // [{foo: 0}, {foo: 5}]
+
+
+#### `contains`
+Will check if a string contains the given value.
+
+    var test = pursuit({
+        foo: { contains: 'b' }
+    });
+
+    [{foo: 'abc'}, {foo: 'bac'}, {foo: 'acd'}].filter(test); // [{foo: 'abc'}, {foo: 'bac'}]
+
+
+#### `beginsWith`
+Will check if a string begins with the given value.
+
+    var test = pursuit({
+        foo: { beginsWith: 'ba' }
+    });
+
+    [{foo: 'abc'}, {foo: 'bac'}, {foo: 'acd'}].filter(test); // [{foo: 'bac'}]
+
+
+#### `endsWith`
+Will check if a string ends with the given value.
+
+    var test = pursuit({
+        foo: { endsWith: 'ac' }
+    });
+
+    [{foo: 'abc'}, {foo: 'bac'}, {foo: 'acd'}].filter(test); // [{foo: 'bac'}]
+
+
+### `not`
+By using the `not` property you can invert the result of any check.
+
+    var test = pursuit({
+        foo: {
+            not: { equals: 'bac' }
+        }
+    });
+
+    [{foo: 'abc'}, {foo: 'bac'}, {foo: 'acd'}].filter(test); // [{foo: 'abc'}, {foo: 'acd'}]
+
+
+### Nested objects
+If you need to test values inside of objects that has a nestet structure, such as:
+
+    var sites = [
+        {
+            'title': 'The Red Site',
+            config: {
+                'background-color': 'red'
+            }
+        },
+        {
+            'title': 'The Blue Site',
+            config: {
+                'background-color': 'blue'
+            }
+        }
+    ];
+
+To get all the sites with a red background color wirte this:
+
+    var test = pursuit({
+        config: {
+            'background-color': {
+                equals: 'red'
+            }
+        }
+    });
+
+    sites.filter(test); // [{ 'title': 'The Red Site', ... }]
+
+Notice. At the moment you can't have a key with the name `not` in your objects, as it will conflict with the match-inverter property. The language might change its syntax to have a prefix in the near future.
+
+
+### OR
+Alternative queries can be created by using Arrays. The following will check for `bar === 5` OR `bar === 10`.
+
+    var test = pursuit([
+        { bar: {equals: 5}},
+        { bar: {equals: 10}}
+    ]);
+
+    [{bar: 5}, {bar: 6}, {bar: 10}, {bar: 11}].filter(test); // [{bar: 5}, {bar: 10}]
+
+It will check in the order they checks are written in the array, so consider the order of your checks, as it will return true as soon as it sees a match.
+
+
 ## Development
 After cloning the project you will have to run `npm install` in the project root. This will install the various grunt plugins and other dependencies.
 

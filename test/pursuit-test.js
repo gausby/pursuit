@@ -167,24 +167,3 @@ buster.testCase('Pursuit', {
     }
 
 });
-
-buster.testCase('Claims made in the README.md', {
-    'in the usage section': function () {
-        var test = pursuit({
-            'foo': { equals: 'bar' }
-        });
-
-        assert.isTrue(test({ 'foo': 'bar' }));
-        refute.isTrue(test({ 'foo': 'baz' }));
-        refute.isTrue(test({ 'baz': 'foo' }));
-
-        var inputList = [
-            { 'foo': 'bar', value: 1 },
-            { 'foo': 'baz', value: 2 },
-            { 'foo': 'bar', value: 3 }
-        ];
-        var returnList = [{ 'foo': 'bar', value: 1 }, { 'foo': 'bar', value: 3 }];
-
-        assert.equals(inputList.filter(test), returnList);
-    }
-});
