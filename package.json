@@ -1,8 +1,9 @@
 {
     "name": "pursuit",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "A JavaScript Object Query Language",
     "author": "Martin Gausby <martin@gausby.dk>",
+    "license": "MIT",
     "repository": "git@github.com:gausby/pursuit.git",
     "bugs": {
         "url" : "https://github.com/gausby/pursuit/issues",
