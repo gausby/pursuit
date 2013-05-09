@@ -4,6 +4,10 @@
     "description": "A JavaScript Object Query Language",
     "author": "Martin Gausby <martin@gausby.dk>",
     "repository": "git@github.com:gausby/pursuit.git",
+    "bugs": {
+        "url" : "https://github.com/gausby/pursuit/issues",
+        "email" : "martin@gausby.dk"
+    },
     "main": "lib/pursuit.js",
     "dependencies": {
     },
