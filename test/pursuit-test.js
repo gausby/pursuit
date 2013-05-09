@@ -164,6 +164,38 @@ buster.testCase('Pursuit', {
                 }
             }
         }));
+    },
+
+    'OR blocks within a sub-scope should keep the scope': function (){
+        var query = pursuit({
+            a: {
+                b: [
+                    {c: {equals: 'c'}},
+                    {c: {equals: 'd'}}
+                ]
+            }
+        });
+
+        assert.isTrue(query({a: { b: { c: 'c' }}}));
+        assert.isTrue(query({a: { b: { c: 'd' }}}));
+        refute.isTrue(query({a: { b: { c: 'e' }}}));
+    },
+
+    'OR blocks within a sub-scope should keep the scope when inverting the result': function (){
+        var query = pursuit({
+            a: {
+                b: {
+                    not: [
+                        {c: {equals: 'c'}},
+                        {c: {equals: 'd'}}
+                    ]
+                }
+            }
+        });
+
+        assert.isTrue(query({a: { b: { c: 'e' }}}));
+        refute.isTrue(query({a: { b: { c: 'c' }}}));
+        refute.isTrue(query({a: { b: { c: 'd' }}}));
     }
 
 });
