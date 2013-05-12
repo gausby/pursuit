@@ -131,16 +131,18 @@ Will check if a string ends with the given value.
     [{foo: 'abc'}, {foo: 'bac'}, {foo: 'acd'}].filter(test); // [{foo: 'bac'}]
 
 
-### `not`
-By using the `not` property you can invert the result of any check.
+### `!not`
+By using the `!not` property you can invert the result of any check.
 
     var test = pursuit({
         foo: {
-            not: { equals: 'bac' }
+            '!not': { equals: 'bac' }
         }
     });
 
     [{foo: 'abc'}, {foo: 'bac'}, {foo: 'acd'}].filter(test); // [{foo: 'abc'}, {foo: 'acd'}]
+
+Notice: The not-operator is prefixed with a bang. This makes it possible to use the word `not` as the name of a key, if you are testing properties in a nestet object, in your input object.
 
 
 ### Nested objects
@@ -172,8 +174,6 @@ To get all the sites with a red background color wirte this:
     });
 
     sites.filter(test); // [{ 'title': 'The Red Site', ... }]
-
-Notice. At the moment you can't have a key with the name `not` in your objects, as it will conflict with the match-inverter property. The language might change its syntax to have a prefix in the near future.
 
 
 ### OR

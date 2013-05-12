@@ -185,7 +185,7 @@ buster.testCase('Pursuit', {
         var query = pursuit({
             a: {
                 b: {
-                    not: [
+                    '!not': [
                         {c: {equals: 'c'}},
                         {c: {equals: 'd'}}
                     ]

@@ -131,10 +131,10 @@ buster.testCase('Claims made in the README.md', {
         );
     },
 
-    'usage: not': function () {
+    'usage: !not': function () {
         var test = pursuit({
             foo: {
-                not: { equals: 'bac' }
+                '!not': { equals: 'bac' }
             }
         });
 
