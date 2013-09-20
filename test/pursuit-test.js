@@ -6,8 +6,8 @@ var buster = require('buster'),
     pursuit = require('../lib/pursuit')
 ;
 
-var assert = buster.assertions.assert;
-var refute = buster.assertions.refute;
+var assert = buster.referee.assert;
+var refute = buster.referee.refute;
 
 buster.testCase('Pursuit', {
     'should compile a query language into a JavaScript function': function () {
