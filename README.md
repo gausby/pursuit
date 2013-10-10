@@ -131,6 +131,20 @@ Will check if a string ends with the given value.
     [{foo: 'abc'}, {foo: 'bac'}, {foo: 'acd'}].filter(test); // [{foo: 'bac'}]
 
 
+#### `typeOf`
+Will check if the input is of a certain JavaScript type.
+
+    var test = pursuit({
+        foo: { typeOf: 'string' }
+    });
+
+    [{foo: 'abc'}, {foo: 5}, {foo: false}].filter(test); // [{foo: 'abc'}]
+
+It can check for the following types: `string`, `number`, `object`, `boolean`, `array`, and `null`.
+
+The test for `object` does not return true for `null` values. At the time being `object` return true for arrays. I do not know if it should stay that way.
+
+
 ### `!not`
 By using the `!not` property you can invert the result of any check.
 

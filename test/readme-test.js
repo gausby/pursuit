@@ -131,6 +131,17 @@ buster.testCase('Claims made in the README.md', {
         );
     },
 
+    'usage: typeOf': function () {
+        var test = pursuit({
+            foo: { typeOf: 'string' }
+        });
+
+        assert.equals(
+            [{foo: 'abc'}, {foo: 5}, {foo: false}].filter(test),
+            [{foo: 'abc'}]
+        );
+    },
+
     'usage: !not': function () {
         var test = pursuit({
             foo: {

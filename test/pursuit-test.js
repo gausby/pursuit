@@ -112,6 +112,43 @@ buster.testCase('Pursuit', {
         refute.isTrue(query({'foo': 'apples are healthy'}));
     },
 
+    'should be able to test if a value is of a specific type': function () {
+        var isString = pursuit({ foo: { typeOf: 'string' }});
+        assert.isTrue(isString({'foo': 'banana'}));
+        refute.isTrue(isString({'foo': (new Date())}));
+        refute.isTrue(isString({'foo': 5}));
+
+        var isNumber = pursuit({ foo: { typeOf: 'number' } });
+        assert.isTrue(isNumber({'foo': 5}));
+        assert.isTrue(isNumber({'foo': 0}));
+
+        var isObject = pursuit({ foo: { typeOf: 'object' } });
+        assert.isTrue(isObject({'foo': []}));
+        assert.isTrue(isObject({'foo': {}}));
+
+        refute.isTrue(isObject({'foo': 1}));
+        refute.isTrue(isObject({'foo': null}));
+        refute.isTrue(isObject({'foo': undefined}));
+
+        var isBoolean = pursuit({ foo: { typeOf: 'boolean' } });
+        assert.isTrue(isBoolean({foo: true}));
+        assert.isTrue(isBoolean({foo: false}));
+
+        var isUndefined = pursuit({ foo: { typeOf: 'undefined' } });
+        assert.isTrue(isUndefined({foo: undefined}));
+        refute.isTrue(isUndefined({foo: null}));
+
+        var isArray = pursuit({ foo: { typeOf: 'array' } });
+        assert.isTrue(isArray({foo: [undefined]}));
+        refute.isTrue(isArray({foo: {}}));
+
+        var isNull = pursuit({ foo: { typeOf: 'null' } });
+        assert.isTrue(isNull({foo: null}));
+        refute.isTrue(isNull({foo: undefined}));
+        refute.isTrue(isNull({foo: {}}));
+    },
+
+
     'should be able to test if a string ends a specified substring': function () {
         var query = pursuit({
             foo: { endsWith: 'ab' }
