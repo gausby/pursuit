@@ -142,6 +142,20 @@ buster.testCase('Claims made in the README.md', {
         );
     },
 
+    'usage: instanceOf': function () {
+        var A = function () {};
+        var B = function () {};
+
+        var test = pursuit({
+            foo: { instanceOf: A }
+        });
+
+        assert.equals(
+            [{foo: (new A())}, {foo: (new B())}, {foo: (new A())}].filter(test),
+            [{foo: (new A())}, {foo:  (new A())}]
+        );
+    },
+
     'usage: !not': function () {
         var test = pursuit({
             foo: {

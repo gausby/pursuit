@@ -1,6 +1,6 @@
 {
     "name": "pursuit",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "description": "A JavaScript Object Query Language",
     "author": "Martin Gausby <martin@gausby.dk>",
     "license": "MIT",

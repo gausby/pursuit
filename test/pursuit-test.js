@@ -16,20 +16,6 @@ buster.testCase('Pursuit', {
         }));
     },
 
-    'should return a function that returns true if no query is given': function () {
-        assert.equals(pursuit({}).toString(), 'function anonymous(entry) {\nreturn true\n}');
-    },
-
-    'should make Arrays into OR statements': function () {
-        assert.equals(
-            pursuit([
-                [{ bar: { equals: 'baz' }},{ baz: { equals: 'foo' }}],
-                { foo: { equals: 'bar' }}
-            ]).toString(),
-            'function anonymous(entry) {\nreturn ((entry["bar"] === "baz")||(entry["baz"] === "foo"))||(entry["foo"] === "bar")\n}'
-        );
-    },
-
     'should be able to check for equality': function () {
         var query = pursuit({
             foo: { equals: 'bar' }
@@ -148,6 +134,30 @@ buster.testCase('Pursuit', {
         refute.isTrue(isNull({foo: {}}));
     },
 
+    'should be able to test if a value is an instance of an object': function () {
+        var A = function () {};
+        var B = function () {};
+
+        var test = pursuit({
+            foo: { 'instanceOf': A }
+        });
+
+        assert.isTrue(test({ foo: new A() }));
+        refute.isTrue(test({ foo: new B() }));
+    },
+
+    'should be able to test if multiple values are instances of multiple objects': function () {
+        var A = function () {};
+        var B = function () {};
+
+        var test = pursuit({
+            bar: { 'instanceOf': B },
+            foo: { 'instanceOf': A }
+        });
+
+        assert.isTrue(test({ foo: (new A()), bar: (new B()) }));
+        refute.isTrue(test({'foo': (new A())}));
+    },
 
     'should be able to test if a string ends a specified substring': function () {
         var query = pursuit({
@@ -201,6 +211,19 @@ buster.testCase('Pursuit', {
                 }
             }
         }));
+    },
+
+    'should keep its local scope when using OR blocks': function () {
+        var A = function () {};
+        var B = function () {};
+
+        var query = pursuit([
+            { foo: { instanceOf: A }},
+            { foo: { instanceOf: B }}
+        ]);
+
+        var test = [{foo: (new A())}, {foo: (new B())}, {foo: (new A())}];
+        assert.equals(test.filter(query).length, 3);
     },
 
     'OR blocks within a sub-scope should keep the scope': function (){
