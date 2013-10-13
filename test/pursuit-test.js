@@ -256,6 +256,29 @@ buster.testCase('Pursuit', {
         assert.isTrue(query({a: { b: { c: 'e' }}}));
         refute.isTrue(query({a: { b: { c: 'c' }}}));
         refute.isTrue(query({a: { b: { c: 'd' }}}));
-    }
+    },
 
+    'should be able to use a custom dictionary': function () {
+        var dict = {
+            '$eq': function (key, value, scope) {
+                return scope + '['+key+'] === ' + value;
+            },
+            '$lt': function (key, value, scope) {
+                return scope + '['+key+'] > ' + value;
+            }
+        };
+
+        var test = pursuit.call({ dictionary: dict }, {
+            foo: { '$eq': 'bar' },
+            test: { '$lt': 5 }
+        });
+
+        var obj = [
+            {foo: 'bar', test: 2},
+            {foo: 'bar', test: 6},
+            {foo: 'baz', test: 2}
+        ];
+
+        assert.equals(obj.filter(test).length, 1);
+    }
 });
