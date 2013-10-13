@@ -207,5 +207,29 @@ buster.testCase('Claims made in the README.md', {
             [{bar: 5}, {bar: 6}, {bar: 10}, {bar: 11}].filter(test),
             [{bar: 5}, {bar: 10}]
         );
+    },
+
+    'usage: Creating your own query language': function () {
+        var customLanguage = {
+            dictionary: {
+                $eq: function (key, value, scope) {
+                    return scope+'['+key+'] === '+value;
+                },
+                $lt: function (key, value, scope) {
+                    return scope+'['+key+'] < '+value;
+                },
+                $gt: function (key, value, scope) {
+                    return scope+'['+key+'] > '+value;
+                }
+            }
+        };
+
+        var test = pursuit.call(customLanguage, {
+            foo: { $eq: 'bar' },
+            bar: { $lt: 5 },
+            baz: { $gt: 10 }
+        });
+
+        assert.isTrue(test({ foo: 'bar', bar: 1, baz: 50 }));
     }
 });
