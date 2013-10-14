@@ -1,6 +1,6 @@
 {
     "name": "pursuit",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "description": "A JavaScript Object Query Language",
     "keywords": ["object", "query", "matcher", "filter"],
     "author": "Martin Gausby <martin@gausby.dk>",

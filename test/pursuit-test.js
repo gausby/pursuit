@@ -280,5 +280,26 @@ buster.testCase('Pursuit', {
         ];
 
         assert.equals(obj.filter(test).length, 1);
+    },
+
+    'negation should work in root level': function (){
+        var query = pursuit({ '!not': { foo: { equals: 'foo'}} });
+
+        assert.isTrue(query({ foo: 'baz' }));
+        refute.isTrue(query({ foo: 'foo' }));
+        assert.isTrue(query({ foo: 'bar' }));
+    },
+
+    'negation should work in root level with OR statement': function (){
+        var query = pursuit({
+            '!not': [
+                { foo: { equals: 'foo' }},
+                { foo: { equals: 'bar' }}
+            ]
+        });
+
+        assert.isTrue(query({ foo: 'baz' }));
+        refute.isTrue(query({ foo: 'foo' }));
+        refute.isTrue(query({ foo: 'bar' }));
     }
 });
