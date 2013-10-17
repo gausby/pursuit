@@ -301,5 +301,15 @@ buster.testCase('Pursuit', {
         assert.isTrue(query({ foo: 'baz' }));
         refute.isTrue(query({ foo: 'foo' }));
         refute.isTrue(query({ foo: 'bar' }));
+    },
+
+    'should return a string of source code if debug is true': function () {
+        var query = pursuit.call({ debug: true }, {
+            'foo': { equals: 'bar' }
+        });
+
+        assert.isString(query);
+        assert.equals(query, 'return entry["foo"] === "bar"');
+
     }
 });

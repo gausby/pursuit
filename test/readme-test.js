@@ -231,5 +231,13 @@ buster.testCase('Claims made in the README.md', {
         });
 
         assert.isTrue(test({ foo: 'bar', bar: 1, baz: 50 }));
+    },
+
+    'Development: Inspecting Generated Source Code': function () {
+        var test = pursuit.call({ debug: true }, {
+            foo: { 'equals': 'bar' }
+        });
+
+        assert.equals(test, 'return entry["foo"] === "bar"');
     }
 });
