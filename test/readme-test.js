@@ -156,6 +156,18 @@ buster.testCase('Claims made in the README.md', {
         );
     },
 
+    'usage: isSet': function () {
+        var test = pursuit({
+            foo: { isSet: true },
+            bar: { isSet: false }
+        });
+
+        assert.equals(
+            [{foo: 1}, {bar: 2}, {foo: 1, bar: 2}].filter(test),
+            [{foo: 1}]
+        );
+    },
+
     'usage: !not': function () {
         var test = pursuit({
             foo: {
@@ -212,14 +224,14 @@ buster.testCase('Claims made in the README.md', {
     'usage: Creating your own query language': function () {
         var customLanguage = {
             dictionary: {
-                $eq: function (key, value, scope) {
-                    return scope+'['+key+'] === '+value;
+                $eq: function (value) {
+                    return this.getScope() +' === '+value;
                 },
-                $lt: function (key, value, scope) {
-                    return scope+'['+key+'] < '+value;
+                $lt: function (value) {
+                    return this.getScope() +' < '+value;
                 },
-                $gt: function (key, value, scope) {
-                    return scope+'['+key+'] > '+value;
+                $gt: function (value) {
+                    return this.getScope()+' > '+value;
                 }
             }
         };

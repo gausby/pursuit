@@ -16,6 +16,18 @@ buster.testCase('Pursuit', {
         }));
     },
 
+    'should be able to check if a key is set on an object': function () {
+        var fooIsSet = pursuit({ foo: { isSet: '"true"' } });
+        var fooIsNotSet = pursuit({ foo: { isSet: '"false"' } });
+
+        assert.isTrue(fooIsSet({foo: 'bar'}));
+        refute.isTrue(fooIsSet({baz: 'bar'}));
+        assert.isTrue(fooIsNotSet({baz: 'bar'}));
+        refute.isTrue(fooIsNotSet({'foo': 'bar'}));
+
+        assert.isTrue(true);
+    },
+
     'should be able to check for equality': function () {
         var query = pursuit({
             foo: { equals: 'bar' }
@@ -96,6 +108,7 @@ buster.testCase('Pursuit', {
         assert.isTrue(query({'foo': 'back in the bay area'}));
         assert.isTrue(query2({'foo': 'zebras can handle quite some attention from other zebras.'}));
         refute.isTrue(query({'foo': 'apples are healthy'}));
+        refute.exception(function() { query({'baz': 'foo'}); });
     },
 
     'should be able to test if a value is of a specific type': function () {
@@ -260,11 +273,11 @@ buster.testCase('Pursuit', {
 
     'should be able to use a custom dictionary': function () {
         var dict = {
-            '$eq': function (key, value, scope) {
-                return scope + '['+key+'] === ' + value;
+            '$eq': function (value) {
+                return this.getScope() + ' === ' + value;
             },
-            '$lt': function (key, value, scope) {
-                return scope + '['+key+'] > ' + value;
+            '$lt': function (value) {
+                return this.getScope() + ' > ' + value;
             }
         };
 
