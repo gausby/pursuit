@@ -11,112 +11,18 @@ var refute = buster.referee.refute;
 
 buster.testCase('Pursuit', {
     'should compile a query language into a JavaScript function': function () {
-        assert.isFunction(pursuit({
-            test: { equals: 'test' }
-        }));
+        assert.isFunction(pursuit({}));
     },
 
     'should return a string of source code if debug is true': function () {
-        var query = pursuit.call({ debug: true }, {
-            'foo': { equals: 'bar' }
-        });
+        var query = pursuit.call({ debug: true }, {});
 
         assert.isString(query);
-        assert.equals(query, 'return entry["foo"] === "bar"');
-    }
-});
-
-buster.testCase('Pursuit nesting', {
-    'should be able check on values nested two levels deep': function () {
-        var query = pursuit({
-            config: {
-                type: {
-                    equals: 'test'
-                }
-            }
-        });
-
-        // in this case object.config.type should be `test`
-        assert.isTrue(query({
-            foo: 'bar',
-            config: {
-                type: 'test'
-            }
-        }));
+        assert.equals(query, 'return true');
     },
 
-    'should be able check on values nested three (or more) levels deep': function () {
-        var query = pursuit({
-            foo: {
-                bar: {
-                    baz: {
-                        equals: ':)'
-                    }
-                }
-            }
-        });
-
-        // foo.bar.baz should be `:)`
-        assert.isTrue(query({
-            foo: {
-                bar: {
-                    baz: ':)'
-                }
-            }
-        }));
-    }
-});
-
-buster.testCase('Pursuit OR-blocks', {
-    'should keep its local scope': function () {
-        var A = function () {};
-        var B = function () {};
-
-        var query = pursuit([
-            { foo: { instanceOf: A }},
-            { foo: { instanceOf: B }}
-        ]);
-
-        var test = [{foo: (new A())}, {foo: (new B())}, {foo: (new A())}];
-        assert.equals(test.filter(query).length, 3);
-    },
-
-    'should keep the scope within a sub-scope': function (){
-        var query = pursuit({
-            a: {
-                b: [
-                    {c: {equals: 'c'}},
-                    {c: {equals: 'd'}}
-                ]
-            }
-        });
-
-        assert.isTrue(query({a: { b: { c: 'c' }}}));
-        assert.isTrue(query({a: { b: { c: 'd' }}}));
-        refute.isTrue(query({a: { b: { c: 'e' }}}));
-    },
-
-    'should keep the scope when inverting the result within a sub-scope': function (){
-        var query = pursuit({
-            a: {
-                b: {
-                    '!not': [
-                        {c: {equals: 'c'}},
-                        {c: {equals: 'd'}}
-                    ]
-                }
-            }
-        });
-
-        assert.isTrue(query({a: { b: { c: 'e' }}}));
-        refute.isTrue(query({a: { b: { c: 'c' }}}));
-        refute.isTrue(query({a: { b: { c: 'd' }}}));
-    }
-});
-
-buster.testCase('Pursuit custom dictionary', {
     'should be able to use a custom dictionary': function () {
-        var dict = {
+        var custom = {
             '$eq': function (value) {
                 return this.getScope() + ' === ' + value;
             },
@@ -125,7 +31,7 @@ buster.testCase('Pursuit custom dictionary', {
             }
         };
 
-        var test = pursuit.call({ dictionary: dict }, {
+        var test = pursuit.call({ dictionary: custom }, {
             foo: { '$eq': 'bar' },
             test: { '$lt': 5 }
         });
@@ -140,27 +46,132 @@ buster.testCase('Pursuit custom dictionary', {
     }
 });
 
+buster.testCase('Pursuit nesting', {
+    setUp: function () {
+        // setup a dictionary so we don't rely on the defualt one
+        // for the tests
+        this.setup = {
+            dictionary: {
+                'equals': function (value) {
+                    return this.getScope() + ' === '+value;
+                }
+            }
+        };
+    },
+
+    'should be able check on values nested two levels deep': function () {
+        var query = pursuit.call(this.setup, {
+            foo: {
+                bar: {
+                    equals: 'baz'
+                }
+            }
+        });
+
+        assert.isTrue(query({ foo: { bar: 'baz' }}));
+        refute.isTrue(query({ foo: { bar: 'bar' }}));
+    },
+
+    'should be able check on values nested three (or more) levels deep': function () {
+        var query = pursuit.call(this.setup, {
+            foo: { bar: { baz: { equals: 'toto' }}}
+        });
+
+        // foo.bar.baz should be `toto`
+        assert.isTrue(query({ foo: { bar: { baz: 'toto' }}}));
+        refute.isTrue(query({ foo: { bar: { baz: 'tata' }}}));
+    }
+});
+
+buster.testCase('Pursuit OR-blocks', {
+    setUp: function () {
+        // setup a dictionary so we don't rely on the defualt one
+        // for the tests
+        this.setup = {
+            dictionary: {
+                'equals': function (value) {
+                    return this.getScope() + ' === '+value;
+                }
+            }
+        };
+    },
+
+    'should keep its local scope': function () {
+        var query = pursuit.call(this.setup, [
+            { foo: { equals: 'bar' }},
+            { foo: { equals: 'baz' }}
+        ]);
+
+        var test = [{foo: 'bar'}, {foo: 'baz'}, {foo: 'bar'}];
+        assert.equals(test.filter(query).length, 3);
+    },
+
+    'should keep the scope within a sub-scope': function (){
+        var query = pursuit.call(this.setup, {
+            foo: {
+                bar: [
+                    {baz: {equals: 'toto'}},
+                    {baz: {equals: 'titi'}}
+                ]
+            }
+        });
+
+        assert.isTrue(query({foo: { bar: { baz: 'toto' }}}));
+        assert.isTrue(query({foo: { bar: { baz: 'titi' }}}));
+        refute.isTrue(query({foo: { bar: { baz: 'tata' }}}));
+    },
+
+    'should keep the scope when inverting the result within a sub-scope': function (){
+        var query = pursuit.call(this.setup, {
+            foo: {
+                bar: {
+                    '!not': [
+                        {baz: {equals: 'toto'}},
+                        {baz: {equals: 'titi'}}
+                    ]
+                }
+            }
+        });
+
+        assert.isTrue(query({foo: { bar: { baz: 'tata' }}}));
+        refute.isTrue(query({foo: { bar: { baz: 'toto' }}}));
+        refute.isTrue(query({foo: { bar: { baz: 'titi' }}}));
+    }
+});
 
 buster.testCase('Pursuit negation', {
+    setUp: function () {
+        // setup a dictionary so we don't rely on the defualt one
+        // for the tests
+        this.setup = {
+            dictionary: {
+                'equals': function (value) {
+                    return this.getScope() + ' === '+value;
+                }
+            }
+        };
+    },
 
     'should work in root level': function (){
-        var query = pursuit({ '!not': { foo: { equals: 'foo'}} });
+        var query = pursuit.call(this.setup, {
+            '!not': { foo: { equals: 'tata' }}
+        });
 
-        assert.isTrue(query({ foo: 'baz' }));
-        refute.isTrue(query({ foo: 'foo' }));
-        assert.isTrue(query({ foo: 'bar' }));
+        refute.isTrue(query({ foo: 'tata' }));
+        assert.isTrue(query({ foo: 'titi' }));
+        assert.isTrue(query({ foo: 'toto' }));
     },
 
     'should work in root level with OR statement': function (){
-        var query = pursuit({
+        var query = pursuit.call(this.setup, {
             '!not': [
-                { foo: { equals: 'foo' }},
-                { foo: { equals: 'bar' }}
+                { foo: { equals: 'toto' }},
+                { foo: { equals: 'tata' }}
             ]
         });
 
-        assert.isTrue(query({ foo: 'baz' }));
-        refute.isTrue(query({ foo: 'foo' }));
-        refute.isTrue(query({ foo: 'bar' }));
+        assert.isTrue(query({ foo: 'titi' }));
+        refute.isTrue(query({ foo: 'toto' }));
+        refute.isTrue(query({ foo: 'tata' }));
     }
 });
