@@ -250,6 +250,6 @@ buster.testCase('Claims made in the README.md', {
             foo: { 'equals': 'bar' }
         });
 
-        assert.equals(test, 'return entry["foo"] === "bar"');
+        assert.equals(test, 'function anonymous(entry) { return entry["foo"] === "bar" }');
     }
 });

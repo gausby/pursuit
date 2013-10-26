@@ -18,31 +18,65 @@ buster.testCase('Pursuit', {
         var query = pursuit.call({ debug: true }, {});
 
         assert.isString(query);
-        assert.equals(query, 'return true');
+        assert.equals(query, 'function anonymous(entry) { return true }');
     },
 
     'should be able to use a custom dictionary': function () {
-        var custom = {
-            '$eq': function (value) {
-                return this.getScope() + ' === ' + value;
-            },
-            '$lt': function (value) {
-                return this.getScope() + ' > ' + value;
+        refute.exception(function () {
+            var custom = {
+                '$eq': function (value) {
+                    return this.getScope() + ' === ' + value;
+                },
+                '$lt': function (value) {
+                    return this.getScope() + ' > ' + value;
+                }
+            };
+
+            var test = pursuit.call({ dictionary: custom }, {
+                foo: { '$eq': 'bar' },
+                test: { '$lt': 5 }
+            });
+
+            var obj = [
+                {foo: 'bar', test: 2},
+                {foo: 'bar', test: 6},
+                {foo: 'baz', test: 2}
+            ];
+
+            assert.equals(obj.filter(test).length, 1);
+        });
+    }
+});
+
+buster.testCase('Pursuit error handling', {
+    'should throw an error if a key is not in the dictionary': function () {
+        var setup = { dictionary: {} };
+        assert.exception(function() {
+            pursuit.call(setup, {
+                foo: { bar: 'test' }
+            });
+        });
+    },
+
+    'should throw an error if a dictionary key returns an error': function () {
+        var setup = {
+            dictionary : {
+                bar: function (value) {
+                    if (value === '"tata"') {
+                        return new Error('\''+value+'\' is not a valid value.');
+                    }
+                    else {
+                        return 'true';
+                    }
+                }
             }
         };
 
-        var test = pursuit.call({ dictionary: custom }, {
-            foo: { '$eq': 'bar' },
-            test: { '$lt': 5 }
+        assert.exception(function() {
+            pursuit.call(setup, {
+                foo: { bar: 'tata' }
+            });
         });
-
-        var obj = [
-            {foo: 'bar', test: 2},
-            {foo: 'bar', test: 6},
-            {foo: 'baz', test: 2}
-        ];
-
-        assert.equals(obj.filter(test).length, 1);
     }
 });
 
@@ -60,26 +94,27 @@ buster.testCase('Pursuit nesting', {
     },
 
     'should be able check on values nested two levels deep': function () {
-        var query = pursuit.call(this.setup, {
-            foo: {
-                bar: {
-                    equals: 'baz'
-                }
-            }
-        });
+        var setup = this.setup;
+        refute.exception(function () {
+            var query = pursuit.call(setup, {
+                foo: { bar: { equals: 'baz' }}
+            });
 
-        assert.isTrue(query({ foo: { bar: 'baz' }}));
-        refute.isTrue(query({ foo: { bar: 'bar' }}));
+            assert.isTrue(query({ foo: { bar: 'baz' }}));
+            refute.isTrue(query({ foo: { bar: 'bar' }}));
+        });
     },
 
     'should be able check on values nested three (or more) levels deep': function () {
-        var query = pursuit.call(this.setup, {
-            foo: { bar: { baz: { equals: 'toto' }}}
-        });
+        var setup = this.setup;
+        refute.exception(function () {
+            var query = pursuit.call(setup, {
+                foo: { bar: { baz: { equals: 'toto' }}}
+            });
 
-        // foo.bar.baz should be `toto`
-        assert.isTrue(query({ foo: { bar: { baz: 'toto' }}}));
-        refute.isTrue(query({ foo: { bar: { baz: 'tata' }}}));
+            assert.isTrue(query({ foo: { bar: { baz: 'toto' }}}));
+            refute.isTrue(query({ foo: { bar: { baz: 'tata' }}}));
+        });
     }
 });
 
@@ -96,46 +131,89 @@ buster.testCase('Pursuit OR-blocks', {
         };
     },
 
-    'should keep its local scope': function () {
-        var query = pursuit.call(this.setup, [
-            { foo: { equals: 'bar' }},
-            { foo: { equals: 'baz' }}
-        ]);
-
-        var test = [{foo: 'bar'}, {foo: 'baz'}, {foo: 'bar'}];
-        assert.equals(test.filter(query).length, 3);
-    },
-
-    'should keep the scope within a sub-scope': function (){
-        var query = pursuit.call(this.setup, {
-            foo: {
-                bar: [
-                    {baz: {equals: 'toto'}},
-                    {baz: {equals: 'titi'}}
+    'should be able to do OR blocks on keys': function () {
+        // should be able to compile:
+        var setup = this.setup;
+        refute.exception(function () {
+            var query = pursuit.call(setup, {
+                foo: [
+                    { equals: 'toto' },
+                    { equals: 'titi' }
                 ]
-            }
-        });
+            });
 
-        assert.isTrue(query({foo: { bar: { baz: 'toto' }}}));
-        assert.isTrue(query({foo: { bar: { baz: 'titi' }}}));
-        refute.isTrue(query({foo: { bar: { baz: 'tata' }}}));
+            assert.isTrue(query({foo: 'toto'}));
+            assert.isTrue(query({foo: 'titi'}));
+            refute.isTrue(query({foo: 'tata'}));
+        });
     },
 
-    'should keep the scope when inverting the result within a sub-scope': function (){
-        var query = pursuit.call(this.setup, {
-            foo: {
-                bar: {
-                    '!not': [
-                        {baz: {equals: 'toto'}},
-                        {baz: {equals: 'titi'}}
+    'should keep its local scope': function () {
+        var setup = this.setup;
+        refute.exception(function () {
+            var query = pursuit.call(setup, [
+                { foo: { equals: 'bar' }},
+                { foo: { equals: 'baz' }}
+            ]);
+
+            var test = [{foo: 'bar'}, {foo: 'baz'}, {foo: 'bar'}];
+            assert.equals(test.filter(query).length, 3);
+        });
+    },
+
+    'should keep the scope within a sub-scope': function () {
+        var setup = this.setup;
+        refute.exception(function () {
+            var query = pursuit.call(setup, {
+                foo: {
+                    bar: [
+                        { baz: { equals: 'toto' }},
+                        { baz: { equals: 'titi' }}
                     ]
                 }
-            }
-        });
+            });
 
-        assert.isTrue(query({foo: { bar: { baz: 'tata' }}}));
-        refute.isTrue(query({foo: { bar: { baz: 'toto' }}}));
-        refute.isTrue(query({foo: { bar: { baz: 'titi' }}}));
+            assert.isTrue(query({foo: { bar: { baz: 'toto' }}}));
+            assert.isTrue(query({foo: { bar: { baz: 'titi' }}}));
+            refute.isTrue(query({foo: { bar: { baz: 'tata' }}}));
+        });
+    },
+
+    'should keep its scope after visiting a nested property': function () {
+        var setup = this.setup;
+
+        refute.exception(function () {
+            var query = pursuit.call(setup, {
+                foo: {
+                    bar: [{equals: 'titi'}, {equals: 'tata'}],
+                    baz: {equals: 'toto'}
+                }
+            });
+
+            var test = [
+                {foo: {bar: 'titi', baz: 'toto'}},
+                {foo: {bar: 'tata', baz: 'toto'}},
+                {foo: {bar: 'titi'}}
+            ];
+
+            assert.equals(test.filter(query).length, 2);
+        });
+    },
+
+    'should keep the scope when inverting the result within a sub-scope': function () {
+        var setup = this.setup;
+        refute.exception(function () {
+            var query = pursuit.call(setup, {
+                foo: { bar: { '!not': [
+                    {baz: {equals: 'toto'}},
+                    {baz: {equals: 'titi'}}
+                ]}}
+            });
+
+            assert.isTrue(query({foo: { bar: { baz: 'tata' }}}));
+            refute.isTrue(query({foo: { bar: { baz: 'toto' }}}));
+            refute.isTrue(query({foo: { bar: { baz: 'titi' }}}));
+        });
     }
 });
 
@@ -152,26 +230,61 @@ buster.testCase('Pursuit negation', {
         };
     },
 
-    'should work in root level': function (){
-        var query = pursuit.call(this.setup, {
-            '!not': { foo: { equals: 'tata' }}
-        });
+    'should work in root level': function () {
+        var setup = this.setup;
+        refute.exception(function () {
+            var query = pursuit.call(setup, {
+                '!not': { foo: { equals: 'tata' }}
+            });
 
-        refute.isTrue(query({ foo: 'tata' }));
-        assert.isTrue(query({ foo: 'titi' }));
-        assert.isTrue(query({ foo: 'toto' }));
+            refute.isTrue(query({ foo: 'tata' }));
+            assert.isTrue(query({ foo: 'titi' }));
+            assert.isTrue(query({ foo: 'toto' }));
+        });
     },
 
-    'should work in root level with OR statement': function (){
-        var query = pursuit.call(this.setup, {
-            '!not': [
-                { foo: { equals: 'toto' }},
-                { foo: { equals: 'tata' }}
-            ]
-        });
+    'should work in root level with OR-statements': function () {
+        var setup = this.setup;
+        refute.exception(function () {
+            var query = pursuit.call(setup, {
+                '!not': [
+                    { foo: { equals: 'toto' }},
+                    { foo: { equals: 'tata' }}
+                ]
+            });
 
-        assert.isTrue(query({ foo: 'titi' }));
-        refute.isTrue(query({ foo: 'toto' }));
-        refute.isTrue(query({ foo: 'tata' }));
+            assert.isTrue(query({ foo: 'titi' }));
+            refute.isTrue(query({ foo: 'toto' }));
+            refute.isTrue(query({ foo: 'tata' }));
+        });
+    },
+
+    'should work with double negation': function () {
+        var setup = this.setup;
+        refute.exception(function () {
+            var query = pursuit.call(setup, {
+                '!not': { '!not': { foo: { equals: 'tata' }}}
+            });
+
+            assert.isTrue(query({ foo: 'tata' }));
+            refute.isTrue(query({ foo: 'titi' }));
+            refute.isTrue(query({ foo: 'toto' }));
+        });
+    }
+});
+
+buster.testCase('Pursuit optimization', {
+    'should handle empty checks along with non-empty': function () {
+        refute.exception(function() {
+            pursuit({
+                foo: {
+                    bar: [
+                        {beginsWith: 'tata' },
+                        {isSet: true },
+                        {endsWith: 'titi' }
+                    ]
+                }
+            });
+        });
     }
 });
