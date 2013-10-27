@@ -274,6 +274,7 @@ buster.testCase('Pursuit negation', {
 });
 
 buster.testCase('Pursuit optimization', {
+    // I might need to rephrase the name of this test...
     'should handle empty checks along with non-empty': function () {
         refute.exception(function() {
             pursuit({
@@ -281,7 +282,8 @@ buster.testCase('Pursuit optimization', {
                     bar: [
                         {beginsWith: 'tata' },
                         {isSet: true },
-                        {endsWith: 'titi' }
+                        {endsWith: 'titi' },
+                        {equals: 'toto' }
                     ]
                 }
             });
