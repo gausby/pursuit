@@ -1,5 +1,7 @@
 # Pursuit - A JavaScript Object Query Language
 
+**notice** This is an experimental *0.2.0* branch. It introduces optimization of the generated code and parts of the engine has been rewritten. It will be merged into master and published to NPM when it has been tested and proven as good as the current master.
+
 Pursuit is a Object Query Language written for the V8 JavaScript engine. It compiles a given query into JavaScript code for optimal performance when checking many objects for certain characteristics. All compiled functions returns a boolean value, making them useful in filter functions.
 
 This project is heavily inspired by [Mathias Buus](https://github.com/mafintosh)'s [CopenhagenJS](http://copenhagenjs.dk/) talk on [JSON query compilation](https://github.com/mafintosh/json-query-compilation).
