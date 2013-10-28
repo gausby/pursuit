@@ -11,8 +11,8 @@ var refute = buster.referee.refute;
 
 buster.testCase('The default dictionary', {
     'should be able to check if a key is set on an object': function () {
-        var fooIsSet = pursuit({ foo: { isSet: JSON.stringify(true) } });
-        var fooIsNotSet = pursuit({ foo: { isSet: JSON.stringify(false) } });
+        var fooIsSet = pursuit({ foo: { isSet: true } });
+        var fooIsNotSet = pursuit({ foo: { isSet: false } });
 
         assert.isTrue(fooIsSet({foo: 'bar'}));
         refute.isTrue(fooIsSet({baz: 'bar'}));

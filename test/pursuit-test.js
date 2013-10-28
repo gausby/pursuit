@@ -77,6 +77,17 @@ buster.testCase('Pursuit error handling', {
                 foo: { bar: 'tata' }
             });
         });
+    },
+
+    'should throw an error if a dictionary function returns something else than a string': function () {
+        assert.exception(function() {
+            var setup = {
+                dictionary: {
+                    bar: function (value) { return true; }
+                }
+            };
+            pursuit.call(setup, { foo: { bar: 'baz' }});
+        });
     }
 });
 
