@@ -1,6 +1,8 @@
 # Pursuit - A Fast JavaScript Object Property Matching Language
 
-Pursuit is a fast Object Property Matching Language written for the V8 JavaScript engine. It compiles a given query into JavaScript code for optimal performance when checking many objects for certain characteristics. All compiled functions returns a boolean value, making them useful in filter functions.
+Pursuit is a fast Object Property Matching Language written for Node. It compiles a given query into JavaScript code for optimal performance when checking many objects for certain characteristics. All compiled functions returns a boolean value, making them useful in filter functions.
+
+It is used as the default Object Matcher in the [Ecoule](https://github.com/gausby/ecoule)-framework.
 
 This project is heavily inspired by [Mathias Buus](https://github.com/mafintosh)'s [CopenhagenJS](http://copenhagenjs.dk/) talk on [JSON query compilation](https://github.com/mafintosh/json-query-compilation).
 
@@ -214,7 +216,7 @@ The language supports testing on values inside of objects that has a nestet stru
         }
     ];
 
-To get all the sites with a red background color wirte this:
+To get all the sites with a red background color construct your query like this:
 
     var test = pursuit({
         config: {
@@ -224,7 +226,7 @@ To get all the sites with a red background color wirte this:
         }
     });
 
-    sites.filter(test); // [{ 'title': 'The Red Site', ... }]
+    sites.filter(test); // [{'title': 'The Red Site', config: { 'background-color': 'red' } }]
 
 
 ### OR
@@ -240,7 +242,7 @@ Alternative queries can be created by using Arrays. The following will check for
 It will check in the order they checks are written in the array, so consider the order of your checks, as it will return true as soon as it sees a match.
 
 
-### Creating your own query language
+### Creating Your Own Object Matching Language
 It is possible to configure Pursuit with a different directory object just by passing a configuration on initialization. The following will create a matcher that will test for equality (`$eq`), less-than (`$lt`), and greater-than (`$gt`).
 
     var customLanguage = {
@@ -266,6 +268,28 @@ It is possible to configure Pursuit with a different directory object just by pa
     console.log(test({ foo: 'bar', bar: 1, baz: 50 })); // true
 
 More on how to extend the language in the development section.
+
+
+### Disabling Source Optimization
+Pursuit will per default try to optimize the generated source code by putting simple checks first and grouping checks that check the existence of the same objects. If you suspect the optimization causes Pursuit to return false positives you can disable it by calling Pursuit with the optimize-flag set to false.
+
+    var query = {
+        foo: [{ contains: 'bar' }, { contains: 'baz' }],
+        bar: { equals: 'bar' }
+    }
+
+    var test = pursuit.call({optimize: false}, query);
+
+Have a look at the generated source code:
+
+    console.log(pursuit.call({optimize: false, debug: true}, query));
+    // function anonymous(entry) { return (typeof entry["foo"] === "string"&&entry["foo"].indexOf("bar") !== -1||typeof entry["foo"] === "string"&&entry["foo"].indexOf("baz") !== -1)&&entry["bar"] === "bar" }
+
+    // optimize is 'true' by default
+    console.log(pursuit.call({debug: true}, query));
+    // function anonymous(entry) { return entry["bar"] === "bar"&&typeof entry["foo"] === "string"&&(entry["foo"].indexOf("bar") !== -1||entry["foo"].indexOf("baz") !== -1) }
+
+Notice how it put the `entry["bar"] === "bar` first in the optimized version before it check if `entry["foo"]` is a string that contain the word "bar" or "baz". Further notice that the version that has not been optimized will check if `entry["foo"]` is a string twice.
 
 
 ## Development
@@ -347,6 +371,34 @@ The `this.key`, in the the function set in the `dictionary`, correspond in this 
     function anonymous(entry) { return entry["foo"] === "test" }
 
 Both `key` and `value` has been run through `JSON.stringify` before getting passed to the any of the dictionary-functions--unless the `value` is a native JavaScript regular expression or a function; these are just passed through untouched.
+
+
+#### Calling Other Dictionary Functions From Within a Dictionary Function
+If you need the output from another dictionary function you can use the `call`-function that takes two arguments: The name of the dictionary function and the value you want to pass to it.
+
+    var dictionary = {
+        typeOf: function (value) {
+            return typeof this.getScope() + ' === ' + value;
+        },
+
+        contains: function (value) {
+            return [
+                // check if the key exists in the given entry and is a string
+                this.call('typeOf', 'string'),
+                // if the key exists, check if it contains the given value
+                this.getScope() + '.indexOf('+value+') !== -1'
+            ].join('&&');
+        }
+    };
+
+    console.log(pursuit.call({ dictionary: dictionary, debug: true}, { 'foo': { contains: 'bar' }}));
+    // function anonymous(entry) { return string === "string"&&entry["foo"].indexOf("bar") !== -1 }
+
+Besides the obvious benefits of code reusage this will throw errors if the input is incorrect or if an undefined dictionary function is called. Also, keeping the generated source code similar makes Pursuit able to optimize the generated source code.
+
+
+#### Compile-Time and Run-Time Scope
+When Pursuit is done compiling the resulting function it will get passed a special context. This context is accessible as `this.runTime` during compile-time. This is an advanced feature, and it may have limited practical usage, but look at the implementation of the `instanceOf`-directory-function in the default directory shiped with Pursuit.
 
 
 ## License

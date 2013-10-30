@@ -245,6 +245,49 @@ buster.testCase('Claims made in the README.md', {
         assert.isTrue(test({ foo: 'bar', bar: 1, baz: 50 }));
     },
 
+    'Usage: Disabling Source Optimization': function () {
+        var query = {
+            foo: [{ contains: 'bar' }, { contains: 'baz' }],
+            bar: { equals: 'bar' }
+        };
+
+        var test = pursuit.call({optimize: false}, query);
+
+        assert.equals(pursuit.call({optimize: false, debug: true}, query), [
+            'function anonymous(entry) {',
+            ' return (typeof entry["foo"] === "string"&&entry["foo"].indexOf("bar") !== -1',
+            '||typeof entry["foo"] === "string"&&entry["foo"].indexOf("baz") !== -1)&&entry["bar"]',
+            ' === "bar" }'
+        ].join(''));
+
+        assert.equals(pursuit.call({debug: true}, query), [
+            'function anonymous(entry) { return entry["bar"] === "bar"',
+            '&&typeof entry["foo"] === "string"&&(entry["foo"].indexOf("bar") !== -1',
+            '||entry["foo"].indexOf("baz") !== -1) }'
+        ].join(''));
+    },
+
+    'Development: Calling Other Dictionary Functions From Within a Dictionary Function': function() {
+        var dictionary = {
+            typeOf: function (value) {
+                return typeof this.getScope() + ' === ' + value;
+            },
+            contains: function (value) {
+                return [
+                    // check if the key exists in the given entry and is a string
+                    this.call('typeOf', 'string'),
+                    // if the key exists, check if it contains the given value
+                    this.getScope() + '.indexOf('+value+') !== -1'
+                ].join('&&');
+            }
+        };
+
+        assert.equals(
+            pursuit.call({ dictionary: dictionary, debug: true }, {'foo': { contains: 'bar' } }),
+            'function anonymous(entry) { return string === "string"&&entry["foo"].indexOf("bar") !== -1 }'
+        );
+    },
+
     'Development: Inspecting Generated Source Code': function () {
         var test = pursuit.call({ debug: true }, {
             foo: { 'equals': 'bar' }

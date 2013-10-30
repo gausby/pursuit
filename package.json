@@ -1,8 +1,7 @@
 {
     "name": "pursuit",
     "version": "0.2.0",
-    "private": true,
-    "description": "A JavaScript Object Query Language",
+    "description": "A Fast JavaScript Object Property Matching Language",
     "keywords": ["object", "query", "matcher", "filter"],
     "author": "Martin Gausby <martin@gausby.dk>",
     "license": "MIT",
