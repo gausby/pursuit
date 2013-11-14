@@ -45,6 +45,17 @@ buster.testCase('Pursuit', {
 
             assert.equals(obj.filter(test).length, 1);
         });
+    },
+
+    'should be able to check values at root level': function () {
+        var query = pursuit.call({ debug: true }, {
+            equals: 'foo'
+        });
+
+        assert.equals(
+            query,
+            'function anonymous(entry) { return entry === "foo" }'
+        );
     }
 });
 
