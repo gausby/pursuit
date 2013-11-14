@@ -23,9 +23,9 @@ var query = [
         'occupation': { equals: 'Rehabilitation Services Director' }
     },
     {
-        'gender': 'Male',
         'name': { first: {equals: 'Ian' } },
-        'age': { greaterThanOrEqualTo: 21, lessThan: 90},
+        'age': { greaterThanOrEqualTo: 21, lessThan: 90 },
+        'gender': { equals: 'Male' },
         'occupation': { contains: 'Business' }
     }
 ];
