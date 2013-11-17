@@ -56,6 +56,34 @@ buster.testCase('Pursuit', {
             query,
             'function anonymous(entry) { return entry === "foo" }'
         );
+    },
+
+    'should not throw an error when checking on a property and the input is undefined': function () {
+        refute.exception(function() {
+            pursuit({equals: 'bar'})(undefined);
+        });
+    },
+
+    'should not throw an error when checking on a nested property and the input is undefined': function () {
+        refute.exception(function() {
+            pursuit({foo: {equals: 'bar'}})(undefined);
+            pursuit({foo: { bar: {equals: 'bar'}}})(undefined);
+            pursuit({foo: { bar: { baz: {equals: 'bar'}}}})({ foo: { bar: undefined }});
+        });
+    },
+
+    'should not throw an error when checking on a property and the input is null': function () {
+        refute.exception(function() {
+            pursuit({equals: 'bar'})(null);
+        });
+    },
+
+    'should not throw an error when checking on a nested property and the input is null': function () {
+        refute.exception(function() {
+            pursuit({foo: {equals: 'bar'}})(null);
+            pursuit({foo: { bar: {equals: 'bar'}}})({ foo: null });
+            pursuit({foo: { bar: { baz: {equals: 'bar'}}}})({ foo: { bar: null }});
+        });
     }
 });
 

@@ -67,6 +67,7 @@ buster.testCase('Claims made in the README.md', {
             [{foo: 10}]
         );
     },
+
     'usage: greaterThanOrEqualTo': function () {
         var test = pursuit({
             foo: { greaterThanOrEqualTo: 5 }
@@ -77,6 +78,7 @@ buster.testCase('Claims made in the README.md', {
             [{foo: 5}, {foo: 10}]
         );
     },
+
     'usage: lessThan': function () {
         var test = pursuit({
             foo: { lessThan: 5 }
@@ -87,6 +89,7 @@ buster.testCase('Claims made in the README.md', {
             [{foo: 0}]
         );
     },
+
     'usage: lessThanOrEqualTo': function () {
         var test = pursuit({
             foo: { lessThanOrEqualTo: 5 }
@@ -251,26 +254,25 @@ buster.testCase('Claims made in the README.md', {
             bar: { equals: 'bar' }
         };
 
-        var test = pursuit.call({optimize: false}, query);
-
         assert.equals(pursuit.call({optimize: false, debug: true}, query), [
-            'function anonymous(entry) {',
-            ' return (typeof entry["foo"] === "string"&&entry["foo"].indexOf("bar") !== -1',
-            '||typeof entry["foo"] === "string"&&entry["foo"].indexOf("baz") !== -1)&&entry["bar"]',
-            ' === "bar" }'
+            'function anonymous(entry) { return (entry&&',
+            'typeof entry["foo"] === "string"&&entry["foo"].indexOf("bar") !== -1||',
+            'entry&&typeof entry["foo"] === "string"&&',
+            'entry["foo"].indexOf("baz") !== -1)&&',
+            'entry&&entry["bar"] === "bar" }'
         ].join(''));
 
         assert.equals(pursuit.call({debug: true}, query), [
-            'function anonymous(entry) { return entry["bar"] === "bar"',
-            '&&typeof entry["foo"] === "string"&&(entry["foo"].indexOf("bar") !== -1',
-            '||entry["foo"].indexOf("baz") !== -1) }'
+            'function anonymous(entry) { return entry&&(entry["bar"] === "bar"&&',
+            '(typeof entry["foo"] === "string"&&entry["foo"].indexOf("bar") !== -1||',
+            'typeof entry["foo"] === "string"&&entry["foo"].indexOf("baz") !== -1)) }'
         ].join(''));
     },
 
     'Development: Calling Other Dictionary Functions From Within a Dictionary Function': function() {
         var dictionary = {
             typeOf: function (value) {
-                return typeof this.getScope() + ' === ' + value;
+                return 'typeof '+this.getScope() + ' === ' + value;
             },
             contains: function (value) {
                 return [
@@ -284,7 +286,11 @@ buster.testCase('Claims made in the README.md', {
 
         assert.equals(
             pursuit.call({ dictionary: dictionary, debug: true }, {'foo': { contains: 'bar' } }),
-            'function anonymous(entry) { return string === "string"&&entry["foo"].indexOf("bar") !== -1 }'
+            [
+                'function anonymous(entry) { return entry',
+                'typeof entry["foo"] === "string"',
+                'entry["foo"].indexOf("bar") !== -1 }'
+            ].join('&&')
         );
     },
 
@@ -293,6 +299,9 @@ buster.testCase('Claims made in the README.md', {
             foo: { 'equals': 'bar' }
         });
 
-        assert.equals(test, 'function anonymous(entry) { return entry["foo"] === "bar" }');
+        assert.equals(
+            test,
+            'function anonymous(entry) { return entry&&entry["foo"] === "bar" }'
+        );
     }
 });

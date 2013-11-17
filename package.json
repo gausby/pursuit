@@ -1,8 +1,8 @@
 {
     "name": "pursuit",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "A Fast JavaScript Object Property Matching Language",
-    "keywords": ["object", "query", "matcher", "filter"],
+    "keywords": ["object", "query", "match", "matcher", "filter", "every", "some"],
     "author": "Martin Gausby <martin@gausby.dk>",
     "license": "MIT",
     "repository": "git@github.com:gausby/pursuit.git",
