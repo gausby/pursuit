@@ -166,8 +166,19 @@ buster.testCase('Claims made in the README.md', {
         });
 
         assert.equals(
-            [{foo: 1}, {bar: 2}, {foo: 1, bar: 2}].filter(test),
-            [{foo: 1}]
+            [{foo: 1}, {bar: 2}, {foo: 3, bar: null}].filter(test),
+            [{foo: 1}, {foo: 3, bar: null}]
+        );
+    },
+
+    'usage: hasBeenTouched' : function () {
+        var test = pursuit({ hasBeenTouched: true });
+        assert.isTrue(test(undefined)); // true
+
+        var test2 = pursuit({ foo: { hasBeenTouched: true }});
+        assert.equals(
+            [{foo: null, bar: 1}, { bar: 1 }, {foo: 2}].filter(test2),
+            [{foo: null, bar: 1}, {foo: 2}]
         );
     },
 

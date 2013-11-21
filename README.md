@@ -172,16 +172,31 @@ Will check if the input is of a given JavaScript object instance.
 
 
 #### `isSet`
-Will check if the key is set on an object; value can be `true` for set; and or `false` for not set.
+Will check if the key is set to a value (everything but `null` or `undefined`) on an object; value can be `true` for set; and or `false` for not set.
 
     var test = pursuit({
         foo: { isSet: true },
         bar: { isSet: false }
     });
 
-    [{foo: 1}, {bar: 2}, {foo: 1, bar: 2}].filter(test); // [{foo: 1}]
 
-**Notice**, isSet will return true if the set value is set to `undefined` or `null`.
+    [{foo: 1}, {bar: 2}, {foo: 3, bar: null}].filter(test) // [{foo: 1}, {foo: 3, bar: null}]
+
+**Notice**, `isSet` will return true if the set value is set to anything but `undefined` or `null`. Falsy values like `0`, `false` and `""` (the empty string) will return `true`.
+
+
+#### `hasBeenTouched`
+Will check if a key has been set on an object. It will return true even if the value is set to `undefined` or `null`. It will always return `true` (or `false` if set to check if a value has not been touched) if the key is the root object:
+
+    var test = pursuit({ hasBeenTouched: true });
+    test(undefined); // true
+
+It is more useful in nested objects.
+
+    var test = pursuit({ foo: { hasBeenTouched: true }});
+    [{foo: null, bar: 1}, { bar: 1 }, {foo: 2}].filter(test); // [{foo: null, bar: 1}, {foo: 2}]
+
+In most cases you would use the `isSet` function that return true for any value except undefined or null.
 
 
 ### `!not`

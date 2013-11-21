@@ -10,16 +10,40 @@ var assert = buster.referee.assert;
 var refute = buster.referee.refute;
 
 buster.testCase('The default dictionary', {
-    'should be able to check if a key is set on an object': function () {
-        var fooIsSet = pursuit({ foo: { isSet: true } });
-        var fooIsNotSet = pursuit({ foo: { isSet: false } });
+    'should be able to check if a key has been touched on an object': function () {
+        // by 'touched' we mean 'set to something,' so {foo: null} and {foo: undefined}
+        // would return true, where checking if foo is something in the object {bar: 1}
+        // would return false.
+        var test = [
+            {bar: 1}, {foo: 9}, {bar: 0},
+            {foo: null}, { foo: undefined }, {foo: ''}
+        ];
 
-        assert.isTrue(fooIsSet({foo: 'bar'}));
-        refute.isTrue(fooIsSet({baz: 'bar'}));
-        assert.isTrue(fooIsNotSet({baz: 'bar'}));
-        refute.isTrue(fooIsNotSet({'foo': 'bar'}));
+        assert.equals(
+            test.filter(pursuit({foo: {hasBeenTouched: true}})),
+            [{foo: 9}, {foo: null}, { foo: undefined }, {foo: ''}]
+        );
 
-        assert.isTrue(true);
+        assert.equals(
+            test.filter(pursuit({foo: {hasBeenTouched: false}})),
+            [{bar: 1}, {bar: 0}]
+        );
+
+        assert.equals(
+            [1, 9, 0, null, undefined, ''].filter(pursuit({hasBeenTouched: true})),
+            [1, 9, 0, null, undefined, '']
+        );
+    },
+
+    'should be able to check if an value has been set on a key (ie: not null or undefined)': function () {
+        assert.equals(
+            [1, 9, 0, null, undefined, ''].filter(pursuit({isSet: true})),
+            [1, 9, 0, '']
+        );
+        assert.equals(
+            [1, 9, 0, null, undefined, ''].filter(pursuit({isSet: false})),
+            [null, undefined]
+        );
     },
 
     'should be able to check for equality': function () {
