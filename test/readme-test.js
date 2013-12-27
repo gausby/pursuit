@@ -6,8 +6,8 @@ var buster = require('buster'),
     pursuit = require('../lib/pursuit')
 ;
 
-var assert = buster.referee.assert;
-var refute = buster.referee.refute;
+var assert = buster.assert;
+var refute = buster.refute;
 
 buster.testCase('Claims made in the README.md', {
     'in the usage section': function () {

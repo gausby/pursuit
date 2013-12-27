@@ -6,8 +6,8 @@ var buster = require('buster'),
     pursuit = require('../lib/pursuit')
 ;
 
-var assert = buster.referee.assert;
-var refute = buster.referee.refute;
+var assert = buster.assert;
+var refute = buster.refute;
 
 buster.testCase('The default dictionary', {
     'should be able to check if a key has been touched on an object': function () {
