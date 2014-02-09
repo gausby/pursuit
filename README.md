@@ -10,6 +10,8 @@ This project is heavily inspired by [Mathias Buus](https://github.com/mafintosh)
 
 It does use [`new Function`](https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function) to compile the generated code into functional code, so take great precautions with what you trust it with. Think twice before using it to generate code on the client-side.
 
+**Notice:** From 0.3.0 `instanceOf` is no longer supported, and the interface has been changed a bit. Look into Pursuit Core if you customize the language.
+
 
 ## Usage
 
