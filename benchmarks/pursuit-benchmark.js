@@ -31,26 +31,18 @@ var query = [
 ];
 
 var optimized = pursuit(query);
-var nonOptimized = pursuit.call({optimize: false}, query);
 
 module.exports = {
     name: 'Pursuit',
     onComplete: function() {
         console.log(
-            'Optimized found:', testSet.filter(optimized).length,
-            'Non-optimized found:', testSet.filter(nonOptimized).length
+            'Items found:', testSet.filter(optimized).length
         );
     },
     tests: {
         'optimized': {
             fn: function() {
                 testSet.filter(optimized);
-                return;
-            }
-        },
-        'non-optimized': {
-            fn: function() {
-                testSet.filter(nonOptimized);
                 return;
             }
         }

@@ -2,6 +2,8 @@
 
 Pursuit is a fast Object Property Matching Language written for Node. It compiles a given query into JavaScript code for optimal performance when checking many objects for certain characteristics. All compiled functions returns a boolean value, making them useful in filter functions.
 
+This package is a distribution that combines [Pursuit Core](https://github.com/gausby/pursuit-core/) with [Pursuit Dictionary](https://github.com/gausby/pursuit-dictionary/). Look at these projects if you want a custom language with other properties than this.
+
 It is used as the default Object Matcher in the [Ecoule](https://github.com/gausby/ecoule)-framework.
 
 This project is heavily inspired by [Mathias Buus](https://github.com/mafintosh)'s [CopenhagenJS](http://copenhagenjs.dk/) talk on [JSON query compilation](https://github.com/mafintosh/json-query-compilation).
@@ -158,19 +160,6 @@ It can check for the following types: `string`, `number`, `object`, `boolean`, `
 The test for `object` does not return true for `null` values. At the time being `object` return true for arrays. I do not know if it should stay that way.
 
 
-#### `instanceOf`
-Will check if the input is of a given JavaScript object instance.
-
-    var A = function () {};
-    var B = function () {};
-
-    var test = pursuit({
-        foo: { instanceOf: A }
-    });
-
-    [{foo: (new A())}, {foo: (new B())}, {foo: (new A())}].filter(test); // [{foo: function() {}}, {foo: function() {}}]
-
-
 #### `isSet`
 Will check if the key is set to a value (everything but `null` or `undefined`) on an object; value can be `true` for set; and or `false` for not set.
 
@@ -257,56 +246,6 @@ Alternative queries can be created by using Arrays. The following will check for
 It will check in the order they checks are written in the array, so consider the order of your checks, as it will return true as soon as it sees a match.
 
 
-### Creating Your Own Object Matching Language
-It is possible to configure Pursuit with a different directory object just by passing a configuration on initialization. The following will create a matcher that will test for equality (`$eq`), less-than (`$lt`), and greater-than (`$gt`).
-
-    var customLanguage = {
-        dictionary: {
-            $eq: function (value) {
-                return this.getScope() +' === '+value;
-            },
-            $lt: function (value) {
-                return this.getScope() +' < '+value;
-            },
-            $gt: function (value) {
-                return this.getScope()+' > '+value;
-            }
-        }
-    };
-
-    var test = pursuit.call(customLanguage, {
-        foo: { $eq: 'bar' },
-        bar: { $lt: 5 },
-        baz: { $gt: 10 }
-    });
-
-    console.log(test({ foo: 'bar', bar: 1, baz: 50 })); // true
-
-More on how to extend the language in the development section.
-
-
-### Disabling Source Optimization
-Pursuit will per default try to optimize the generated source code by putting simple checks first and grouping checks that check the existence of the same objects. If you suspect the optimization causes Pursuit to return false positives you can disable it by calling Pursuit with the optimize-flag set to false.
-
-    var query = {
-        foo: [{ contains: 'bar' }, { contains: 'baz' }],
-        bar: { equals: 'bar' }
-    }
-
-    var test = pursuit.call({optimize: false}, query);
-
-Have a look at the generated source code:
-
-    console.log(pursuit.call({optimize: false, debug: true}, query));
-    // function anonymous(entry) { return (entry&&typeof entry["foo"] === "string"&&entry["foo"].indexOf("bar") !== -1||entry&&typeof entry["foo"] === "string"&&entry["foo"].indexOf("baz") !== -1)&&entry&&entry["bar"] === "bar" }
-
-    // optimize is 'true' by default
-    console.log(pursuit.call({debug: true}, query));
-    // function anonymous(entry) { return entry&&(entry["bar"] === "bar"&&(typeof entry["foo"] === "string"&&entry["foo"].indexOf("bar") !== -1||typeof entry["foo"] === "string"&&entry["foo"].indexOf("baz") !== -1)) }
-
-Notice how it put the `entry&&entry["bar"] === "bar` first in the optimized version before it check if `entry["foo"]` is a string that contain the word "bar" or "baz". Further notice that the version that has not been optimized will check if `entry["foo"]` is a string twice.
-
-
 ## Development
 After cloning the project you will have to run `npm install` in the project root. This will install the various grunt plugins and other dependencies.
 
@@ -338,87 +277,11 @@ You can run the benchmarks by running `grunt benchmark`. This will output some s
 
 The tests use a static data set, data.json, located in the benchmark folder. If you want a bigger data set a new one can be created by changing the number of times the random person generator is run in the `random-person.js`-file and run it by typing `node random-person.js` in a terminal.
 
-Notice, these benchmarks are only usable if they are run on the same computer, because it measures the time a task takes. The parameters that could influence this vary from system to system. That said, if you run benchmarks once in a while, while trying to optimize the speed of the library, it should give you some insights. Some insights are better than none.
-
-
-#### Generating Documentation
-The project uses YUIDocs that can be generated by running `grunt docs`. This will create a site with documentation in a folder called `docs/` in the project root which can be served on port 8888 by typing `grunt connect:docs`. If you want to generate docs on file modification you can run `grunt watch:docs`.
-
-
-### Inspecting Generated Source Code
-If you need to inspect the source code generated by Pursuit, pass it a debug flag like this:
-
-    var test = pursuit.call({ debug: true }, {
-        foo: { 'equals': 'bar' }
-    });
-
-    console.log(test); // function anonymous(entry) { return entry&&entry["foo"] === "bar" }'
-
-`test` will hold a string representation of the generated source code.
-
-
-### Adding new properties to the query language
-Have a look in the source code and find the `directory`-object in the `default-directory.js`-file.
-
-Adding a new property is as simple as creating a new key-value-pair. The key will be the name of your property and the value will be a function that takes one argument, `value`, and should return a string of valid JavaScript source-code. Available to this returned source code is a special variable called `entry`, which is the object that is passed to the generated matching function.
-
-The code for the build-in `equals`-property could be (and is) written as:
-
-    var dictionary = {
-        equals: function (value) {
-            return this.getScope() + ' === ' + value;
-        }
-    }
-
-Within a dictionary function `this.scope` will correspond to the current scope; `this.key` will refer to the current key in the scope; a check for the existence of the parent objects will automatically be generated for you when we are dealing with nestet scopes. A convenience function called `this.getScope()` is accessable and will create the correct.
-
-To understand what `this.key` and `value` correspond to, read the following usage example.
-
-    var test = pursuit({
-        'foo': {
-            'equals': 'test'
-        }
-    });
-
-The `this.key`, in the the function set in the `dictionary`, correspond in this example to `foo`, and the value to `test` as seen in the generated output.
-
-    // The previous example will result in a function like this:
-    function anonymous(entry) { return entry["foo"] === "test" }
-
-Both `key` and `value` has been run through `JSON.stringify` before getting passed to the any of the dictionary-functions--unless the `value` is a native JavaScript regular expression or a function; these are just passed through untouched.
-
-
-#### Calling Other Dictionary Functions From Within a Dictionary Function
-If you need the output from another dictionary function you can use the `call`-function that takes two arguments: The name of the dictionary function and the value you want to pass to it.
-
-    var dictionary = {
-        typeOf: function (value) {
-            return 'typeof '+this.getScope() + ' === ' + value;
-        },
-        contains: function (value) {
-            return [
-                // check if the key exists in the given entry and is a string
-                this.call('typeOf', 'string'),
-                // if the key exists, check if it contains the given value
-                this.getScope() + '.indexOf('+value+') !== -1'
-            ].join('&&');
-        }
-    };
-
-    console.log(pursuit.call({ dictionary: dictionary, debug: true }, { 'foo': { contains: 'bar' }}));
-    // function anonymous(entry) { return entry&&typeof entry["foo"] === "string"&&entry["foo"].indexOf("bar") !== -1 }
-
-Besides the obvious benefits of code reusage this will throw errors if the input is incorrect or if an undefined dictionary function is called. Also, keeping the generated source code similar makes Pursuit able to optimize the generated source code.
-
-
-#### Compile-Time and Run-Time Scope
-When Pursuit is done compiling the resulting function it will get passed a special context. This context is accessible as `this.runTime` during compile-time. This is an advanced feature, and it may have limited practical usage, but look at the implementation of the `instanceOf`-directory-function in the default directory shiped with Pursuit.
-
 
 ## License
 The MIT License (MIT)
 
-Copyright (c) 2013 Martin Gausby
+Copyright (c) 2014 Martin Gausby
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

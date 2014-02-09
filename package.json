@@ -1,6 +1,6 @@
 {
     "name": "pursuit",
-    "version": "0.2.3",
+    "version": "0.3.1",
     "description": "A Fast JavaScript Object Property Matching Language",
     "keywords": ["object", "query", "match", "matcher", "filter", "every", "some"],
     "author": "Martin Gausby <martin@gausby.dk>",
@@ -12,6 +12,8 @@
     },
     "main": "lib/pursuit.js",
     "dependencies": {
+        "pursuit-core": "0.0.1",
+        "pursuit-dictionary": "0.0.1"
     },
     "devDependencies": {
         "grunt": "0.4.1",
